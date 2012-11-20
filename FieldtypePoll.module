@@ -1,0 +1,133 @@
+<?php
+
+/**
+ * ProcessWire Poll Fieldtype
+ *
+ * Fieldtype that allows to have quick and simple polls on website
+ *
+ * by @apeisa
+ * 
+ * ProcessWire 2.x 
+ * Copyright (C) 2010 by Ryan Cramer 
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ * 
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+$dirname = dirname(__FILE__); 
+
+require_once($dirname . "/PollApe.php"); 
+
+class FieldtypePoll extends Fieldtype {
+
+	/**
+	 * The default Inputfield class associated with this Fieldtype
+	 *
+	 */
+	const defaultInputfieldClass = 'InputfieldTextarea';
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Poll',
+			'version' => 100,
+			'summary' => 'Field that stores voting poll',
+			'installs' => array('InputfieldPoll')
+			);
+	}
+
+	public function init() {
+		$this->set('inputfieldClass', self::defaultInputfieldClass); 
+		parent::init();
+	}
+
+	public function getInputfield(Page $page, Field $field) {
+		$inputfield = $this->modules->get('InputfieldPoll'); 
+		return $inputfield; 
+	}
+
+	public function ___getCompatibleFieldtypes(Field $field) {
+		// there are no other fieldtypes compatible with this one
+		return null;
+	}
+
+
+	public function sanitizeValue(Page $page, Field $field, $value) {
+		// if it's not a MapMarker, then just return a blank MapMarker
+		if(!$value instanceof PollApe) $value = $this->getBlankValue($page, $field);
+
+		return $value;
+	}
+
+	public function getBlankValue(Page $page, Field $field) {
+		$PollApe = new PollApe($field->name); 
+		$PollApe->setPage($page); 
+		$PollApe->setTrackChanges(true);
+		return $PollApe;
+	}
+
+	public function ___wakeupValue(Page $page, Field $field, $value) {
+
+		// get a blank MapMarker instance
+		$PollApe = $this->getBlankValue($page, $field); 
+
+		$json = json_decode($value['data']);
+
+		if ($json != null && $json != "") $PollApe->options = $value['data'];
+		else $PollApe->options = "[]";
+		$PollApe->settings = $value['settings'];
+		$PollApe->voters = $value['voters'];
+		$PollApe->setTrackChanges(true); 
+
+		return $PollApe; 
+	}
+
+	public function ___sleepValue(Page $page, Field $field, $value) {
+
+		if(!$value instanceof PollApe) 
+			throw new WireException("Expecting an instance of PollApe");
+
+		$sleepValue = array(
+			'data' => $value->options, 
+			'voters' => $value->voters,
+			'settings' => $value->settings
+			);
+
+		return $sleepValue; 
+	}
+
+	public function getDatabaseSchema(Field $field) {
+		$schema = parent::getDatabaseSchema($field); 
+		$schema['data'] = 'mediumtext NOT NULL';
+		$schema['voters'] = 'mediumtext NOT NULL';
+		$schema['settings'] = 'text NOT NULL';
+		$schema['keys']['data'] = 'FULLTEXT KEY data (data)'; 
+		return $schema;
+	}
+
+	public function ___getConfigInputfields(Field $field) {
+
+		$inputfields = parent::___getConfigInputfields($field);
+		$f= $this->modules->get('InputfieldSelect');
+		$f->attr('name', 'inputfieldClass'); 
+		$f->attr('value', $field->inputfieldClass ? $field->inputfieldClass : self::defaultInputfieldClass); 
+		$f->label = 'Inputfield Type';
+		$f->description = 
+			"The type of field that will be used to collect input (Textarea is the default). " . 
+			"Note that if you change this and submit, the available configuration options in " . 
+			"the 'Inputfield Settings' section below may change.";
+		$f->required = true; 
+
+		$baseClass = "InputfieldPoll";
+		foreach($this->fuel('modules')->find("className^=Inputfield") as $fm) {
+			if("$fm" == $baseClass || is_subclass_of("$fm", $baseClass)) 
+				$f->addOption("$fm", str_replace("Inputfield", '', "$fm")); 
+		}
+
+		$inputfields->append($f); 	
+
+		return $inputfields; 
+	}
+
+}

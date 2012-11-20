@@ -1,0 +1,35 @@
+/* Inputfield Poll CSS */
+.content .InputfieldPoll label {
+	font-weight: bold;
+}
+
+.content .InputfieldPollOption {
+	padding: 4px 2px;
+	margin: 0px 0px 1px 0px;
+}
+
+.content .InputfieldPoll .InputfieldPollTitle {
+	margin-bottom: 1em;
+	width: 100%;
+}
+
+.content .InputfieldPoll .InputfieldPollReset {
+	float: right;
+}
+
+.content .InputfieldPollOption .ui-icon {
+	margin-top: 3px;
+}
+
+.content .InputfieldPollOption input {
+	width: 80%;
+	padding: 4px;
+	border-radius: 3px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+	
+	border: 1px solid rgba(0,0,0,0.5);
+}
+
+.InputfieldPollOptionDelete {
+	float: right;
+}

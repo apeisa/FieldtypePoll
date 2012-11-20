@@ -1,0 +1,165 @@
+<?php
+
+/**
+ * An Inputfield for handling XHTML "textarea" form inputs
+ *
+ */
+class InputfieldPoll extends Inputfield {
+
+	const defaultRows = 5; 
+
+	public static function getModuleInfo() {
+		return array(
+			'title' => __('Poll', __FILE__), // Module Title
+			'summary' => __('Simple voting poll', __FILE__), // Module Summary
+			'version' => 100,
+			'requires' => array("AngularJS, AngularUI")
+			);
+	}
+
+
+	public function init() {
+		parent::init();
+		$this->modules->get("AngularJS");
+		$this->modules->get("AngularUI");
+	}
+
+	public function __construct() {
+		require_once(dirname(__FILE__) . '/PollApe.php'); 
+		parent::__construct();
+	}
+
+	public function ___render() {
+
+		$name = $this->attr('name'); 
+
+		$attrs = $this->getAttributes();
+		unset($attrs['value']);
+
+		$js  = '';
+
+		$out  = "<script>" . $this->_returnAngularAppJS() . "</script>";		
+
+		$out .= "<div ng-app='{$this->name}' ng-controller='{$this->name}Ctrl'>";
+		$out .= "<label>" . $this->_("Poll title") . "</label>";
+		$out .= "<input class='InputfieldPollTitle' ng-model='settings.title' />";
+
+		$out .= "<label>" . $this->_("Poll options") . "</label>";
+		$out .= "<ul ui-sortable ng-model='options'>";
+		$out .= "<li class='ui-state-default InputfieldPollOption' ng-repeat='option in options'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span> <input ng-model='option.title' /> <label class='InputfieldPollOptionDelete' ng-click='removeOption(\$index)'><span class='ui-icon ui-icon-trash'></span></label><b>{{option.votes}}</b>";
+		$out .= "</ul>";
+		$out .= "<a ng-click='addOption()'>" . $this->_('Add New Option') . "</a>";
+		$out .= "<a class='InputfieldPollReset' ng-click='resetPoll()'>" . $this->_('Reset poll') . "</a>";
+		$out .= "<input type='hidden' " . $this->getAttributesString($attrs) . " value='{{options}}' />";
+		$out .= "<input type='hidden' name='_{$name}_settings' value='{{settings}}' />";
+		$out .= "<input ng-disabled='!settings.reset' type='hidden' name='_{$name}_reset' value='true' />";
+		$out .= "</div>";
+		return $out; 
+	}
+
+	/**
+	 * Set an attribute to this Inputfield
+	 *
+	 * In this case, we just capture the 'value' attribute and make sure it's something valid
+ 	 *
+	 */
+	public function setAttribute($key, $value) {
+
+		if($key == 'value' && !$value instanceof PollApe && !is_null($value)) {
+			throw new WireException("This input only accepts a PollApe for it's value"); 
+		}
+
+		return parent::setAttribute($key, $value); 
+	}
+
+	/**
+	 * Render just the value (not input) in text/markup for presentation purposes
+	 *
+	 * @return string of text or markup where applicable
+	 *
+	 */
+	public function ___renderValue() {
+		return $this->attr('value');
+		/*
+		$out = nl2br(htmlentities($this->attr('value'), ENT_QUOTES, "UTF-8"));
+		return $out;
+		*/
+	}
+
+	public function ___processInput(WireInputData $input) {
+
+		$name = $this->attr('name'); 
+		$PollApe = $this->attr('value');
+
+		if(isset($input->$name)) {
+			$PollApe->set('options', $input->$name);
+			$PollApe->set('settings', $input["_{$name}_settings"]);
+			if ($input["_{$name}_reset"])
+				$PollApe->set('voters', "");
+		}
+
+		return $this;
+	}
+
+
+	private function _returnAngularAppJS() {
+
+		// Init the app
+		$out  = "var myModule = angular.module('$this->name', ['ui']);";
+
+		// Start controller
+		$out .= 'function '. $this->name .'Ctrl($scope) {';
+
+		// Initial values [options]
+  		$out .= '$scope.options = ';
+  		if (strlen($this->value->options) > 0)
+    		$out .= $this->renderValue()->options;
+    	else 
+    		$out .= "[]";
+    	$out .= ';';
+
+   		// Initial values [settings]
+  		$out .= '$scope.settings = ';
+  		if (strlen($this->value->settings) > 0)
+    		$out .= $this->renderValue()->settings;
+    	else 
+    		$out .= "''";
+    	$out .= ';';
+
+    	// Add new row
+    	$out .= '$scope.addOption = function() {';
+    	$out .= '$scope.options.push({title: "'. $this->_("New option") .'", votes: 0 });';
+    	$out .= '};';
+
+    	// Remove row
+    	$out .= '$scope.removeOption = function(i) {';
+    	$out .= 'var title = $scope.options[i].title;';
+    	$out .= 'if (confirm("' . $this->_('Remove option: ') . ' " + title + "?"))';
+		$out .= 	'$scope.options.splice(i, 1);';
+    	$out .= '};';
+
+    	// Reset poll
+    	$out .= '$scope.resetPoll = function() {';
+    	$out .= 'if (confirm("' . $this->_("Reset poll? This erases all the options you have defined. You can add new options this way") . '")) {';
+    	$out .= 	'$scope.options = [];';
+    	$out .= 	'$scope.addOption();';
+    	$out .= 	'$scope.settings = {title: "'. $this->_('New poll') .'"};';
+    	$out .= 	'$scope.settings.reset = true;';
+    	$out .= "};";
+    	$out .= '};';
+
+
+    	// End controller
+    	$out .= '}';
+
+    	return $out;
+	}
+
+
+	public function ___getConfigInputfields() {
+		$inputfields = parent::___getConfigInputfields();
+
+
+		return $inputfields; 
+	}
+}
