@@ -34,7 +34,7 @@ Class PollApe Extends WireData {
 
 		foreach ($this->optionsDecoded as $key => $option) {
 			$value = $key + 1;
-			$out .= "<input type='radio' name='{$this->name}' id='{$this->name}-$value' value='$value' /> <label for='{$this->name}-$value'>$option->title</label>";
+			$out .= "<div class='PollApeOption'><input type='radio' name='{$this->name}' id='{$this->name}-$value' value='$value' /> <label for='{$this->name}-$value'>$option->title</label></div>";
 		}
 		$out .= "<input type='submit' value='". $this->_("Vote") ."' />";
 		$out .= "</form></div>";
@@ -50,8 +50,8 @@ Class PollApe Extends WireData {
 		if ($this->settingsDecoded->title) $out .= "<h2>{$this->settingsDecoded->title}</h2>";
 		foreach ($this->optionsDecoded as $key => $option) {
 			$percentage = ($option->votes / $totalVotes) * 100;
-			$out .= "<h3>$option->title</h3>";
-			$out .= "<div class='percentage' style='width: {$percentage}%'>$option->votes</div>";
+			$out .= "<div class='PollApeResultRow'><h3>$option->title</h3>";
+			$out .= "<div class='percentage' style='width: {$percentage}%'>$option->votes</div></div>";
 		}
 		$out .= "<p class='PollApeTotalVotes'>" . sprintf($this->_("%d votes total"), $totalVotes) . "</p>";
 		$out .= "</div>";
