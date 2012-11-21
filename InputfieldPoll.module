@@ -13,7 +13,7 @@ class InputfieldPoll extends Inputfield {
 			'title' => __('Poll', __FILE__), // Module Title
 			'summary' => __('Simple voting poll', __FILE__), // Module Summary
 			'version' => 100,
-			'requires' => array("AngularJS, AngularUI")
+			'requires' => array("AngularJS", "AngularUI")
 			);
 	}
 
