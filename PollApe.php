@@ -32,10 +32,12 @@ Class PollApe Extends WireData {
 		$out .= "<div class='PollApe $this->class'><form method='post' action='./'>";
 		if ($this->settingsDecoded->title) $out .= "<h2>{$this->settingsDecoded->title}</h2>";
 
+		$out .= "<div class='PollApeOptions'>";
 		foreach ($this->optionsDecoded as $key => $option) {
 			$value = $key + 1;
 			$out .= "<div class='PollApeOption'><input type='radio' name='{$this->name}' id='{$this->name}-$value' value='$value' /> <label for='{$this->name}-$value'>$option->title</label></div>";
 		}
+		$out .= "</div>";
 		$out .= "<input type='submit' value='". $this->_("Vote") ."' />";
 		$out .= "</form></div>";
 		return $out;
