@@ -69,7 +69,7 @@ class FieldtypePoll extends Fieldtype {
 
 	public function ___wakeupValue(Page $page, Field $field, $value) {
 
-		// get a blank MapMarker instance
+		// get a blank PollApe instance
 		$PollApe = $this->getBlankValue($page, $field); 
 
 		$json = json_decode($value['data']);
