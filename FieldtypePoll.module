@@ -78,7 +78,7 @@ class FieldtypePoll extends Fieldtype {
 		else $PollApe->options = "[]";
 
 		$settings = json_decode($value['settings']);
-		if ($settings->reset) {
+		if (isset($settings->reset)) {
 			unset($settings->reset);
 			$value['settings'] = json_encode($settings);
 		}
