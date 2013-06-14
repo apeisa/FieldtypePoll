@@ -114,7 +114,7 @@ Class PollApe Extends WireData {
 	}
 
 	public function getUaString() {
-		return $_SERVER['HTTP_USER_AGENT'] . "+" . $_SERVER['SERVER_ADDR'];
+		return $_SERVER['HTTP_USER_AGENT'] . "+" . $_SERVER['REMOTE_ADDR'];
 	}
 
 	public function setPage(Page $page) {
