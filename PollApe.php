@@ -53,7 +53,7 @@ Class PollApe Extends WireData {
 		foreach ($this->optionsDecoded as $key => $option) {
 			$percentage = ($option->votes / $totalVotes) * 100;
 			$out .= "<div class='PollApeResultRow'><h3>$option->title</h3>";
-			$out .= "<div class='percentage' style='width: {$percentage}%'>$option->votes</div></div>";
+			$out .= "<div class='percentage' style='width: {$percentage}%'><span>$option->votes</span></div></div>";
 		}
 		$out .= "<p class='PollApeTotalVotes'>" . sprintf($this->_("%d votes total"), $totalVotes) . "</p>";
 		$out .= "</div>";
